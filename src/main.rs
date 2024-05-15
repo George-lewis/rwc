@@ -124,7 +124,7 @@ impl Statistics {
 
         // `filename` is an unknown length
         // so we can't add it to the `FixedString`
-        println!("{s} {filename}");
+        println!("{s}{filename}");
     }
 }
 
