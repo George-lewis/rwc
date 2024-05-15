@@ -67,7 +67,7 @@ impl<const N: usize> FixedString<N> {
         // actually format the string
         // we could optimize for the no-args case
         // but we have a custom `write!()` macro
-        // that calls into `write_fmt_lit()` instead for that case
+        // that calls into `write_lit()` instead for that case
         let fmt = format(args);
 
         self.push_str_unchecked(&fmt);
