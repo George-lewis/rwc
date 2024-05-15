@@ -195,13 +195,18 @@ fn print_header(options: &Options) -> std::io::Result<()> {
 fn main() -> anyhow::Result<ExitCode> {
     let options = Options::try_parse()?;
 
+    // we only actually need the total statistics
+    // if a total was requested and there are multiple files
+    // however, there might not be a good way to avoid storing it anyway
     let mut total = Statistics::new();
+
+    // this buffer is reused for reading lines
     let mut buffer = String::new();
 
     if options.files.is_empty() {
-        let reader = std::io::stdin().lock();
+        let mut reader = std::io::stdin().lock();
 
-        let statistics = read_file(&mut BufReader::new(reader), &mut buffer)?;
+        let statistics = read_file(&mut reader, &mut buffer)?;
 
         if !options.no_header {
             print_header(&options)?;
@@ -209,9 +214,7 @@ fn main() -> anyhow::Result<ExitCode> {
 
         statistics.print(&options, "-");
     } else {
-        if !options.no_header {
-            print_header(&options)?;
-        }
+        let mut header = !options.no_header;
 
         for filename in &options.files {
             let statistics = if filename == "-" {
@@ -225,13 +228,23 @@ fn main() -> anyhow::Result<ExitCode> {
                 read_file(&mut reader, &mut buffer)
             }?;
 
+            // print the header exactly once
+            //
+            // Q: why not print it at the start of the prgram?
+            // A: because stdin might be interactive
+            if header {
+                print_header(&options)?;
+
+                header = false;
+            }
+
             statistics.print(&options, &filename);
 
             total = total + statistics;
         }
     }
 
-    if options.files.len() > 1 {
+    if options.total && options.files.len() > 1 {
         total.print(&options, "total");
     }
 

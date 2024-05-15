@@ -22,6 +22,9 @@ pub struct Options {
     #[clap(long, default_value_t = true, action = ArgAction::SetFalse)]
     pub filename: bool,
 
+    #[clap(long, default_value_t = true, action = ArgAction::SetFalse)]
+    pub total: bool,
+
     #[clap(long, default_value_t = false)]
     pub no_header: bool,
 }
